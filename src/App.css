@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  border: 1px solid blue;
 }
 
 .App-logo {
@@ -119,3 +120,7 @@ body {
   width: 50%;
   margin: auto;
 }
+/* #tree {
+  border: 1px solid blue !important;
+  height: 750px !important;
+} */
