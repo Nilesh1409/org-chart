@@ -23,11 +23,11 @@ export default class Chart extends Component {
         field_1: "title",
         img_0: "img",
       },
-      nodeBinding: {
-        field_0: "name",
-        field_1: "title",
-        img_0: "img",
-      },
+      // nodeBinding: {
+      //   field_0: "name",
+      //   field_1: "title",
+      //   img_0: "img",
+      // },
     });
   }
 

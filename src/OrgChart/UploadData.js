@@ -1,93 +1,79 @@
-import React, { useState, useCallback } from "react";
-import Cropper from "react-easy-crop";
+import React, { useState } from "react";
 import { compress } from "image-conversion";
-
-import "../App.css";
-
-// import { Button } from "react-bootstrap";
+import axios from "axios";
+import { Input, Button } from "antd";
 
 export default function UploadData() {
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
   const [uploadedImg, setUploadedImg] = useState("");
+  const [uploadedUrl, setUploadedUrl] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
 
-  const handleUpload = async (event) => {
-    const reader = new FileReader();
+  const handleCrop = async (event) => {
     const image = document.getElementById("thumbnail").files[0];
     const compressedImage = await compress(image, {
-      quality: 0.1, // Adjust the quality as desired (0.0 - 1.0)
-      maxWidth: 200, // Set the maximum width of the image
-      maxHeight: 200, // Set the maximum height of the image
+      quality: 0.1,
+      maxWidth: 200,
+      maxHeight: 200,
     });
-    console.log("event.target.files", event.target.files, event.target, image);
 
-    if (image instanceof Blob) {
-      reader.readAsDataURL(compressedImage);
+    const reader = new FileReader();
+    reader.readAsDataURL(compressedImage);
 
-      reader.addEventListener("load", async () => {
-        // const compressedImage = await compress(reader.result, {
-        //   quality: 0.2, // Adjust the quality as desired (0.0 - 1.0)
-        //   maxWidth: 200, // Set the maximum width of the image
-        //   maxHeight: 200, // Set the maximum height of the image
-        // });
-        console.log("compressedImage", compressedImage);
-        setUploadedImg(reader.result);
+    reader.addEventListener("load", () => {
+      setUploadedImg(reader.result);
+    });
+  };
 
-        // localStorage.setItem("thumbnail", reader.result);
+  const handleUpload = async () => {
+    try {
+      const image = document.getElementById("thumbnail").files[0];
+      const compressedImage = await compress(image, {
+        quality: 0.5,
+        maxWidth: 200,
+        maxHeight: 200,
       });
+
+      const croppedFormData = new FormData();
+      croppedFormData.append("file", compressedImage);
+      croppedFormData.append("upload_preset", "sbc8v3zb");
+
+      const croppedResponse = await axios.post(
+        "https://api.cloudinary.com/v1_1/dvbg1a9wo/image/upload",
+        croppedFormData
+      );
+
+      setUploadedUrl(croppedResponse.data.secure_url);
+    } catch (error) {
+      console.log("Error cropping and uploading image:", error);
     }
   };
-  let img = localStorage.getItem("thumbnail");
-  // img = img.slice(5, img.length);
-  // console.log("img", img);
 
-  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    console.log(croppedArea, croppedAreaPixels);
-  }, []);
-  console.log("img", uploadedImg);
+  console.log("image", uploadedUrl);
+
   return (
-    <>
+    <div style={{ margin: "auto", width: "400px" }}>
       <div>
-        {uploadedImg ? (
-          <div className="crop-container">
-            <Cropper
-              image={uploadedImg}
-              crop={crop}
-              zoom={zoom}
-              aspect={1 / 1}
-              onCropChange={setCrop}
-              onCropComplete={onCropComplete}
-              onZoomChange={setZoom}
-              // onCropComplete={}
-            />
+        <Input onChange={(e) => setName(e.target.value)} placeholder="Name" />
+        <br />
+        <br />
+        <Input onChange={(e) => setRole(e.target.value)} placeholder="Role" />
+        <br />
+        <br />
 
-            {/* </div> */}
-            <div style={{ zIndex: 100000 }} className="controls">
-              <input
-                type="range"
-                value={zoom}
-                min={1}
-                max={3}
-                step={0.1}
-                aria-labelledby="Zoom"
-                onChange={(e) => {
-                  setZoom(e.target.value);
-                }}
-                className="zoom-range"
-              />
-              {/* <button onClick={()=>onCropComplete()} >Done</button> */}
-            </div>
-          </div>
-        ) : (
-          ""
-        )}
-
-        <div>
-          <input type="file" id="thumbnail" />
-        </div>
-        <button onClick={(e) => handleUpload(e)}>Upload</button>
-        <img src={img} />
+        <input type="file" id="thumbnail" onChange={handleCrop} />
+        <br />
+        <br />
+        <br />
       </div>
-    </>
+      <Button onClick={handleUpload} type="primary">
+        Upload
+      </Button>
+      {uploadedImg && (
+        <img style={{ height: "250px" }} src={uploadedImg} alt="Uploaded" />
+      )}
+      {/* {croppedImg && <img src={croppedImg} alt="Cropped" />}
+      {croppedImg && <button onClick={handleCrop}>Crop and Upload</button>} */}
+    </div>
   );
 }
