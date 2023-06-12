@@ -1,7 +1,14 @@
 import React, { Component } from "react";
 import OrgChart from "../mytree";
 
+var localData = JSON.parse(localStorage.getItem("org_data")) || [];
 export default class CustomOrgChart extends Component {
+  componentDidUpdate(prevProps) {
+    // Check if the 'render' prop has changed
+    if (this.props.render !== prevProps.render) {
+      localData = JSON.parse(localStorage.getItem("org_data"));
+    }
+  }
   render() {
     return (
       <div style={{ height: "100%" }}>
@@ -10,56 +17,7 @@ export default class CustomOrgChart extends Component {
           template={"diva"}
           enableSearch={false}
           enableDragDrop={true}
-          nodes={[
-            {
-              id: 1,
-              name: "Denny Curtis",
-              title: "CEO",
-              img: "https://cdn.balkan.app/shared/2.jpg",
-            },
-            {
-              id: 2,
-              pid: 1,
-              name: "Ashley Barnett",
-              title: "Sales Manager",
-              img: "https://cdn.balkan.app/shared/3.jpg",
-            },
-            {
-              id: 3,
-              pid: 1,
-              name: "Caden Ellison",
-              title: "Dev Manager",
-              img: "https://cdn.balkan.app/shared/4.jpg",
-            },
-            {
-              id: 4,
-              pid: 2,
-              name: "Elliot Patel",
-              title: "Sales",
-              img: "https://cdn.balkan.app/shared/5.jpg",
-            },
-            {
-              id: 5,
-              pid: 2,
-              name: "Lynn Hussain",
-              title: "Sales",
-              img: "https://cdn.balkan.app/shared/6.jpg",
-            },
-            {
-              id: 6,
-              pid: 3,
-              name: "Tanner May",
-              title: "Developer",
-              img: "https://cdn.balkan.app/shared/7.jpg",
-            },
-            {
-              id: 7,
-              pid: 3,
-              name: "Fran Parsons",
-              title: "Developer",
-              img: "https://cdn.balkan.app/shared/8.jpg",
-            },
-          ]}
+          nodes={localData}
         />
       </div>
     );

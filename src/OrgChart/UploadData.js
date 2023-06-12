@@ -3,7 +3,7 @@ import { compress } from "image-conversion";
 import axios from "axios";
 import { Input, Button } from "antd";
 
-export default function UploadData() {
+export default function UploadData({ reRender, render }) {
   const [uploadedImg, setUploadedImg] = useState("");
   const [uploadedUrl, setUploadedUrl] = useState("");
   const [name, setName] = useState("");
@@ -12,7 +12,7 @@ export default function UploadData() {
   const handleCrop = async (event) => {
     const image = document.getElementById("thumbnail").files[0];
     const compressedImage = await compress(image, {
-      quality: 0.1,
+      quality: 1,
       maxWidth: 200,
       maxHeight: 200,
     });
@@ -29,7 +29,7 @@ export default function UploadData() {
     try {
       const image = document.getElementById("thumbnail").files[0];
       const compressedImage = await compress(image, {
-        quality: 0.5,
+        quality: 0.9,
         maxWidth: 200,
         maxHeight: 200,
       });
@@ -42,8 +42,23 @@ export default function UploadData() {
         "https://api.cloudinary.com/v1_1/dvbg1a9wo/image/upload",
         croppedFormData
       );
-
-      setUploadedUrl(croppedResponse.data.secure_url);
+      let localData = JSON.parse(localStorage.getItem("org_data")) || [];
+      let user = {
+        pid: localData.length,
+        id: localData.length + 1,
+        name: name,
+        title: role,
+        img: croppedResponse.data.secure_url,
+      };
+      localData.push(user);
+      console.log("localData", localData);
+      localStorage.setItem("org_data", JSON.stringify(localData));
+      // clear data after upload for input fields
+      setName("");
+      setRole("");
+      document.getElementById("thumbnail").value = null;
+      setUploadedImg("");
+      reRender(render + 1);
     } catch (error) {
       console.log("Error cropping and uploading image:", error);
     }
@@ -54,10 +69,18 @@ export default function UploadData() {
   return (
     <div style={{ margin: "auto", width: "400px" }}>
       <div>
-        <Input onChange={(e) => setName(e.target.value)} placeholder="Name" />
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
+        />
         <br />
         <br />
-        <Input onChange={(e) => setRole(e.target.value)} placeholder="Role" />
+        <Input
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          placeholder="Role"
+        />
         <br />
         <br />
 
